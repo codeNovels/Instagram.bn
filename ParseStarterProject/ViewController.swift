@@ -11,62 +11,76 @@ import UIKit
 import Parse
 
 class ViewController: UIViewController {
+	
+	var signupMode = true
+	
+	@IBOutlet weak var emailTextField: UITextField!
+	
+	@IBOutlet weak var passwordTextField: UITextField!
+	
+	@IBOutlet weak var changeSignupModeButton: UIButton!
+	
+	@IBOutlet weak var messageLabel: UILabel!
 
+	@IBOutlet weak var signupOrLoginButton: UIButton!
+	
+	@IBAction func signupOrLogin(_ sender: Any) {
+		
+		if emailTextField.text == "" || passwordTextField.text == "" {
+			
+			let alert = UIAlertController(title: "Error in form", message: "Please enter a username and password", preferredStyle: UIAlertControllerStyle.alert)
+			
+			alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { (action) in
+				
+				self.dismiss(animated: true, completion: nil)
+				
+			}))
+			
+				self.present(alert, animated: true, completion: nil)
+			
+		}
+		
+	}
+	
+	@IBAction func changeSignupMode(_ sender: Any) {
+		
+		if signupMode {
+			
+			// Change to login mode
+			
+			signupOrLoginButton.setTitle("Log In", for: [])
+			
+			changeSignupModeButton.setTitle("Sign Up", for: [])
+			
+			messageLabel.text = "Don't have an account?"
+			
+			signupMode = false
+			
+		} else {
+			
+			// Change to signup mode
+			
+			signupOrLoginButton.setTitle("Sign Up", for: [])
+			
+			changeSignupModeButton.setTitle("Log In", for: [])
+			
+			messageLabel.text = "Already have an account?"
+			
+			signupMode = true
+			
+		}
+		
+	}
+	
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-        
-        /*
-        let user = PFObject(className: "Users")
-        
-        user["name"] = "Billy Nguyen"
-        
-        user.saveInBackground{ (success, error)-> Void in
-            
-            if success {
-                print("ObjectSaved")
-                
-            } else {
-                
-                if let error = error {
-                    print(error)
-                    
-                } else {
-                    print("error")
-                }
-            }
-            
-            
-        }
-        */
-        let query = PFQuery(className: "Users")
-        
-        query.getObjectInBackground(withId: "GlZWNS1BLv") { (object, error) in
-            
-            if error != nil {
-                print(error)
-                
-            } else {
-                
-                if let user = object {
-                    
-                    user["name"] = "Remi David"
-                    user.saveInBackground(block: { (success, error) in
-                        if success {
-                                print("saved")
-                        } else {
-                            print("error")
-                        }
-                    })
-                    
-                }
-            }
-        }
-        
+		
+		
+		
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+
     }
 }
