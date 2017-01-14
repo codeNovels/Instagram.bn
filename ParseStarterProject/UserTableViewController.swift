@@ -14,6 +14,7 @@ class UserTableViewController: UITableViewController {
 	var usernames = [""]
 	var userIDs = [""]
 	var isFollowing = ["":false]
+	var refresher: UIRefreshControl!
 
 	@IBAction func logout(_ sender: Any) {
 		
@@ -28,8 +29,7 @@ class UserTableViewController: UITableViewController {
 		
 	}
 	
-    override func viewDidLoad() {
-        super.viewDidLoad()
+	func refresh() {
 		
 		let query = PFUser.query()
 		
@@ -41,16 +41,16 @@ class UserTableViewController: UITableViewController {
 				
 			} else if let users = objects {
 				
-					self.usernames.removeAll()
-					self.userIDs.removeAll()
-					self.isFollowing.removeAll()
+				self.usernames.removeAll()
+				self.userIDs.removeAll()
+				self.isFollowing.removeAll()
 				
-					for object in users {
+				for object in users {
+					
+					if let user = object as? PFUser {
 						
-						if let user = object as? PFUser {
+						if user.objectId != PFUser.current()?.objectId {
 							
-							if user.objectId != PFUser.current()?.objectId {
-								
 							let usernameArray = user.username!.components(separatedBy: "@")
 							
 							self.usernames.append(usernameArray[0])
@@ -60,7 +60,7 @@ class UserTableViewController: UITableViewController {
 							
 							query.whereKey("follower", equalTo: PFUser.current()?.objectId!)
 							query.whereKey("following", equalTo: user.objectId!)
-						
+							
 							query.findObjectsInBackground(block: { (object, error) in
 								
 								if let objects = objects {
@@ -79,26 +79,45 @@ class UserTableViewController: UITableViewController {
 										
 										self.tableView.reloadData()
 										
+										self.refresher?.endRefreshing()
+										
 									}
 									
 								}
 								
 							})
 						}
-							
-					}
 						
 					}
-				
+					
 				}
+				
+			}
 			
 		})
 
+		
+	}
+	
+    override func viewDidLoad() {
+        super.viewDidLoad()
+		
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem()
+		
+		refresh()
+		
+		refresher = UIRefreshControl()
+		
+		refresher?.attributedTitle = NSAttributedString(string: "Pull to refresh")
+		
+		refresher?.addTarget(self, action: #selector(UserTableViewController.refresh), for: UIControlEvents.valueChanged)
+		
+		tableView.addSubview(refresher!)
+		
     }
 
     override func didReceiveMemoryWarning() {
